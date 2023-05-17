@@ -32,21 +32,33 @@ const columns: TableColumn<TableData>[] = [
   { key: 'gender', title: 'Gender', fixed: 'right', width: 100 },
 ];
 
-type TableSize = "middle" | "small" | "large";
+const TABLE_SIZE = ['small', 'middle', 'large'] as const;
+type TableSize = (typeof TABLE_SIZE)[number];
 
 function App() {
-  const [tableSize, setTableSize] = useState<TableSize>('middle')
+  const [tableSize, setTableSize] = useState<TableSize>('middle');
 
   const handleTableSize = (size: TableSize) => {
-    setTableSize(size)
-  }
+    setTableSize(size);
+  };
 
   return (
-    <div style={{padding: '0 20px'}}>
+    <div style={{ padding: '0 20px' }}>
       <div style={{ margin: '20px 0' }}>
-        <button onClick={() => handleTableSize('small')}>small</button>
-        <button onClick={() => handleTableSize('middle')}>middle</button>
-        <button onClick={() => handleTableSize('large')}>large</button>
+        {TABLE_SIZE.map(size => (
+          <button
+            key={size}
+            onClick={() => handleTableSize(size)}
+            style={{
+              border: 'none',
+              cursor: 'pointer',
+              padding: 8,
+              background: tableSize === size ? '#e92' : '#fff',
+            }}
+          >
+            {size}
+          </button>
+        ))}
       </div>
       <Table
         data={data}

@@ -1,13 +1,13 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import './table.css';
 
 interface TableProps<T> {
   data: T[];
   columns: TableColumn<T>[];
   defaultSortColumn?: string;
-  defaultSortDirection?: "asc" | "desc";
+  defaultSortDirection?: 'asc' | 'desc';
   pageSize?: number;
-  size?: "small" | 'middle' | 'large';
+  size?: 'small' | 'middle' | 'large';
   scroll?: {
     x?: number;
     y?: number;
@@ -18,14 +18,14 @@ export interface TableColumn<T> {
   key: keyof T;
   title: string;
   sortable?: boolean;
-  fixed?: "left" | "right";
+  fixed?: 'left' | 'right';
   width?: number;
   render?: (value: T[keyof T], row: T) => React.ReactNode;
 }
 
 interface SortState {
   columnKey: string;
-  direction: "asc" | "desc";
+  direction: 'asc' | 'desc';
 }
 
 function Table<T>(props: TableProps<T>): React.ReactElement {
@@ -36,25 +36,27 @@ function Table<T>(props: TableProps<T>): React.ReactElement {
     defaultSortDirection,
     pageSize = 10,
     scroll,
-    size = 'middle'
+    size = 'middle',
   } = props;
 
   const [currentPage, setCurrentPage] = useState(1);
   const [sortState, setSortState] = useState<SortState>({
-    columnKey: defaultSortColumn || "",
-    direction: defaultSortDirection || "asc",
+    columnKey: defaultSortColumn || '',
+    direction: defaultSortDirection || 'asc',
   });
 
-  let sizeClassName;
+  let sizeClassName, paginationSizeStyle: string;
   switch (size) {
     case 'small':
-      sizeClassName = 'table-small'
+      (sizeClassName = 'table-small'), (paginationSizeStyle = '0.25rem 0.5rem');
       break;
     case 'middle':
-      sizeClassName = 'table-middle'
+      sizeClassName = 'table-middle';
+      paginationSizeStyle = '0.5rem 0.75rem';
       break;
     case 'large':
-      sizeClassName = 'table-large'
+      sizeClassName = 'table-large';
+      paginationSizeStyle = '0.75rem 1rem';
       break;
     default:
       break;
@@ -73,7 +75,7 @@ function Table<T>(props: TableProps<T>): React.ReactElement {
 
     if (aValue === bValue) return 0;
 
-    const sortOrder = direction === "asc" ? 1 : -1;
+    const sortOrder = direction === 'asc' ? 1 : -1;
 
     return sortOrder * (aValue < bValue ? -1 : 1);
   });
@@ -83,20 +85,22 @@ function Table<T>(props: TableProps<T>): React.ReactElement {
 
   const visibleData = sortedData.slice(startRowIndex, endRowIndex);
 
-  const fixedLeftColumns = columns.filter((column) => column.fixed === "left");
-  const fixedRightColumns = columns.filter((column) => column.fixed === "right").reverse();
-  const nofixedColumns = columns.filter(column => !fixedLeftColumns.includes(column) && !fixedRightColumns.includes(column));
+  const fixedLeftColumns = columns.filter(column => column.fixed === 'left');
+  const fixedRightColumns = columns.filter(column => column.fixed === 'right').reverse();
+  const nofixedColumns = columns.filter(
+    column => !fixedLeftColumns.includes(column) && !fixedRightColumns.includes(column)
+  );
 
   const HeaderColumns = ({
     columns,
     fixType,
-    style
+    style,
   }: {
-    columns: TableColumn<T>[],
-    fixType?: 'left' | 'nofix' | 'right',
-    style?: React.CSSProperties
+    columns: TableColumn<T>[];
+    fixType?: 'left' | 'nofix' | 'right';
+    style?: React.CSSProperties;
   }) => {
-    if (columns.length <= 0) return null
+    if (columns.length <= 0) return null;
     return (
       <>
         {columns.map((column, index) => {
@@ -105,129 +109,116 @@ function Table<T>(props: TableProps<T>): React.ReactElement {
               key={column.key as string}
               style={{
                 width: column?.width,
-                position: "sticky",
+                position: 'sticky',
                 zIndex: 99,
                 background: '#e92',
                 left: fixType === 'left' ? column.width && column.width * index : undefined,
                 right: fixType === 'right' ? column.width && column.width * index : undefined,
-                ...style
+                ...style,
               }}
             >
               {column.title}
               {column.sortable && (
                 <button
-                  style={{ marginLeft: "8px" }}
+                  style={{ marginLeft: '8px' }}
                   onClick={() => {
                     setSortState({
                       columnKey: column.key as string,
-                      direction: sortState.direction === "asc" ? "desc" : "asc",
+                      direction: sortState.direction === 'asc' ? 'desc' : 'asc',
                     });
                     setCurrentPage(1);
                   }}
                 >
                   {sortState.columnKey === column.key &&
-                    (sortState.direction === "asc" ? "↑" : "↓")}
+                    (sortState.direction === 'asc' ? '↑' : '↓')}
                 </button>
               )}
             </th>
-          )
+          );
         })}
       </>
-    )
-  }
+    );
+  };
 
   const tableHeader = (
-    <thead style={{ position: "sticky", top: 0, zIndex: 110, background: '#fff' }}>
+    <thead style={{ position: 'sticky', top: 0, zIndex: 110, background: '#fff' }}>
       <tr>
-        <HeaderColumns
-          columns={fixedLeftColumns}
-          fixType={'left'}
-        />
+        <HeaderColumns columns={fixedLeftColumns} fixType={'left'} />
         <HeaderColumns
           columns={nofixedColumns}
           fixType={'nofix'}
           style={{
             zIndex: 1,
-            background: undefined
+            background: undefined,
           }}
         />
-        <HeaderColumns
-          columns={fixedRightColumns}
-          fixType={'right'}
-        />
+        <HeaderColumns columns={fixedRightColumns} fixType={'right'} />
       </tr>
     </thead>
-  )
+  );
 
   const Column = ({
     key,
     column,
     row,
-    style
+    style,
   }: {
-    key: string,
-    column: TableColumn<T>,
-    row: T,
-    style: React.CSSProperties
+    key: string;
+    column: TableColumn<T>;
+    row: T;
+    style: React.CSSProperties;
   }) => (
     <td
       key={key}
       style={{
         textAlign: 'center',
         position: 'sticky',
-        ...style
+        ...style,
       }}
     >
-      {column.render ? column.render(row[column.key], row) : row[column.key] as any}
+      {column.render ? column.render(row[column.key], row) : (row[column.key] as any)}
     </td>
-  )
+  );
 
   const BodyColumns = ({
     row,
     rowIndex,
     columns,
     fixType,
-    style
+    style,
   }: {
-    rowIndex: number,
-    row: T,
-    columns: TableColumn<T>[],
-    fixType?: 'left' | 'nofix' | 'right',
-    style?: React.CSSProperties
+    rowIndex: number;
+    row: T;
+    columns: TableColumn<T>[];
+    fixType?: 'left' | 'nofix' | 'right';
+    style?: React.CSSProperties;
   }) => {
     if (columns.length <= 0) return null;
     return (
       <>
-        {
-          columns.map((column, columnIndex) => (
-            <Column
-              key={`${rowIndex}_${columnIndex}`}
-              row={row}
-              column={column}
-              style={{
-                zIndex: 33,
-                background: '#e92',
-                left: fixType === 'left' ? column.width && column.width * columnIndex : undefined,
-                right: fixType === 'right' ? column.width && column.width * columnIndex : undefined,
-                ...style
-              }}
-            />
-          ))
-        }
+        {columns.map((column, columnIndex) => (
+          <Column
+            key={`${rowIndex}_${columnIndex}`}
+            row={row}
+            column={column}
+            style={{
+              zIndex: 33,
+              background: '#e92',
+              left: fixType === 'left' ? column.width && column.width * columnIndex : undefined,
+              right: fixType === 'right' ? column.width && column.width * columnIndex : undefined,
+              ...style,
+            }}
+          />
+        ))}
       </>
-    )
-  }
+    );
+  };
 
   const tableBody = (
     <tbody>
       {visibleData.map((row, rowIndex) => (
         <tr key={rowIndex}>
-          <BodyColumns
-            row={row}
-            rowIndex={rowIndex}
-            columns={fixedLeftColumns}
-            fixType="left"
-          />
+          <BodyColumns row={row} rowIndex={rowIndex} columns={fixedLeftColumns} fixType="left" />
           <BodyColumns
             row={row}
             rowIndex={rowIndex}
@@ -235,42 +226,37 @@ function Table<T>(props: TableProps<T>): React.ReactElement {
             fixType="nofix"
             style={{
               background: undefined,
-              zIndex: 1
+              zIndex: 1,
             }}
           />
-          <BodyColumns
-            row={row}
-            rowIndex={rowIndex}
-            columns={fixedRightColumns}
-            fixType="right"
-          />
+          <BodyColumns row={row} rowIndex={rowIndex} columns={fixedRightColumns} fixType="right" />
         </tr>
       ))}
     </tbody>
-  )
+  );
 
   const pagination = (
     <div
       style={{
-        display: "flex",
-        justifyContent: "flex-end",
-        alignItems: "center",
-        marginTop: "1rem",
+        display: 'flex',
+        justifyContent: 'flex-end',
+        alignItems: 'center',
+        marginTop: '1rem',
       }}
     >
-      <span style={{ marginRight: "1rem" }}>
+      <span style={{ marginRight: '1rem' }}>
         Page {currentPage} of {totalPages}
       </span>
-      {Array.from(Array(totalPages).keys()).map((pageNumber) => (
+      {Array.from(Array(totalPages).keys()).map(pageNumber => (
         <button
           key={pageNumber}
           onClick={() => setCurrentPage(pageNumber + 1)}
           style={{
-            border: "none",
-            backgroundColor: currentPage === pageNumber + 1 ? "#ccc" : "#fff",
-            cursor: currentPage === pageNumber + 1 ? "default" : "pointer",
-            marginLeft: "0.5rem",
-            padding: size === 'small' ? "0.25rem 0.5rem" : "0.5rem 0.75rem",
+            border: 'none',
+            backgroundColor: currentPage === pageNumber + 1 ? '#ccc' : '#fff',
+            cursor: currentPage === pageNumber + 1 ? 'default' : 'pointer',
+            marginLeft: '0.5rem',
+            padding: paginationSizeStyle,
           }}
         >
           {pageNumber + 1}
