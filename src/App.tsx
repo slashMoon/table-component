@@ -66,7 +66,7 @@ function App() {
         defaultSortColumn="age"
         defaultSortDirection="asc"
         pageSize={10}
-        scroll={{ x: 1500, y: 150 }}
+        scroll={{ x: 1500, y: 300 }}
         size={tableSize}
       />
     </div>
